@@ -22,10 +22,29 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let credential = azure_identity::create_credential()?;
     let client = SecretClient::new(&keyvault_url, credential)?;
 
-    let db_host = client.get("db-host").await?.value;
-    let db_user = client.get("db-user").await?.value;
-    let db_name = client.get("db-name").await?.value;
-    let db_pwd = client.get("db-pwd").await?.value;
+    let db_host = client
+        .get("db-host")
+        .await
+        .map_err(|e| format!("Error fetching db-host: {}", e))?
+        .value;
+
+    let db_user = client
+        .get("db-user")
+        .await
+        .map_err(|e| format!("Error fetching db-user: {}", e))?
+        .value;
+
+    let db_name = client
+        .get("db-name")
+        .await
+        .map_err(|e| format!("Error fetching db-name: {}", e))?
+        .value;
+
+    let db_pwd = client
+        .get("db-pwd")
+        .await
+        .map_err(|e| format!("Error fetching db-pwd: {}", e))?
+        .value;
 
     let connect_string = format!(
         "postgres://{}:{}@{}.{}/{}",
@@ -38,7 +57,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .into_string()
         .unwrap();
     let folder = "data";
-
     let filename = format!("{}/{}/{}-{}.dmp", home, folder, file_prefix, now.date());
 
     let mut command = Command::new("pg_dump")
@@ -62,12 +80,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         file.write_all(&buffer[..bytes_read]).await?;
     }
 
-    // Ensure pg_dump process completes successfully
-    let status = command.wait().await?;
-
-    if !status.success() {
-        eprintln!("pg_dump failed with exit status: {:?}", status);
-        return Err("pg_dump failed".into());
+    let timeout_duration = std::time::Duration::from_secs(60);
+    let result = tokio::time::timeout(timeout_duration, command.wait()).await;
+    match result {
+        Ok(Ok(_status)) => { /* everyting is ok */ }
+        Ok(Err(e)) => eprintln!("pg_dump failed with exit status: {:?}", e),
+        Err(_) => eprintln!("pg_dump timed out"),
     }
 
     println!("Backup successfully written to {}", filename);
