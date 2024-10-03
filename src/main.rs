@@ -68,7 +68,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut reader = BufReader::new(stdout);
 
     let mut file = File::create(&filename).await?;
-    let mut buffer = [0; 8192];
+
+    let buffer_size = env::var("BUFFER_SIZE")
+        .unwrap_or_else(|_| "8192".to_string())
+        .parse::<usize>()
+        .unwrap();
+    let mut buffer = vec![0; buffer_size];
 
     loop {
         let bytes_read = reader.read(&mut buffer).await?;
