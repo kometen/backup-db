@@ -2,11 +2,11 @@ use azure_security_keyvault::prelude::*;
 use dirs::home_dir;
 use dotenv::dotenv;
 use std::env;
-use std::io::{BufReader, Read};
-use std::process::{Command, Stdio};
+use std::process::Stdio;
 use time::OffsetDateTime;
 use tokio::fs::File;
-use tokio::io::AsyncWriteExt;
+use tokio::io::{AsyncReadExt, AsyncWriteExt, BufReader};
+use tokio::process::Command;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -53,7 +53,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut buffer = [0; 8192];
 
     loop {
-        let bytes_read = reader.read(&mut buffer)?;
+        let bytes_read = reader.read(&mut buffer).await?;
 
         if bytes_read == 0 {
             break;

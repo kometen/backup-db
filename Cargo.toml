@@ -12,7 +12,7 @@ serde = { version = "1.0", features = ["derive"] }
 azure_core = { version = "0.20", features = ["enable_reqwest_rustls"] }
 azure_identity = { version = "0.20", default-features = false }
 azure_security_keyvault = "0.20.0"
-tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1", features = ["full"] }
 reqwest = { version = "0.12", features = [
     "stream",
 ], default-features = false, optional = true }
