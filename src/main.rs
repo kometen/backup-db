@@ -1,11 +1,11 @@
 use azure_security_keyvault::prelude::*;
-use dotenv::dotenv;
-use std::{env};
-use time::OffsetDateTime;
-use std::process::{Command, Stdio};
 use dirs::home_dir;
+use dotenv::dotenv;
+use std::env;
+use std::process::{Command, Stdio};
+use time::OffsetDateTime;
 use tokio::fs::File;
-use tokio::io::{AsyncWriteExt};
+use tokio::io::AsyncWriteExt;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -21,30 +21,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let credential = azure_identity::create_credential()?;
     let client = SecretClient::new(&keyvault_url, credential)?;
 
-    let db_host = client.get("db-host").await?;
-    let db_user = client.get("db-user").await?;
-    let db_name = client.get("db-name").await?;
-    let db_pwd = client.get("db-pwd").await?;
+    let db_host = client.get("db-host").await?.value;
+    let db_user = client.get("db-user").await?.value;
+    let db_name = client.get("db-name").await?.value;
+    let db_pwd = client.get("db-pwd").await?.value;
 
     let connect_string = format!(
         "postgres://{}:{}@{}.{}/{}",
-        db_user.value,
-        db_pwd.value,
-        db_host.value,
-        domain,
-        db_name.value
+        db_user, db_pwd, db_host, domain, db_name
     );
 
-    let home = home_dir().unwrap_or_else(|| "".parse().unwrap()).into_os_string().into_string().unwrap();
+    let home = home_dir()
+        .unwrap_or_else(|| "".parse().unwrap())
+        .into_os_string()
+        .into_string()
+        .unwrap();
     let folder = "data";
 
-    let filename = format!(
-        "{}/{}/{}-{}.dmp",
-        home,
-        folder,
-        file_prefix,
-        now.date()
-    );
+    let filename = format!("{}/{}/{}-{}.dmp", home, folder, file_prefix, now.date());
 
     let output = Command::new("pg_dump")
         .arg(&connect_string)
