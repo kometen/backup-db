@@ -2,6 +2,7 @@ use azure_security_keyvault::prelude::*;
 use dirs::home_dir;
 use dotenv::dotenv;
 use std::env;
+use std::io::{BufReader, Read};
 use std::process::{Command, Stdio};
 use time::OffsetDateTime;
 use tokio::fs::File;
@@ -40,19 +41,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let filename = format!("{}/{}/{}-{}.dmp", home, folder, file_prefix, now.date());
 
-    let output = Command::new("pg_dump")
+    let mut command = Command::new("pg_dump")
         .arg(&connect_string)
         .stdout(Stdio::piped())
-        .output()?;
+        .spawn()?;
 
-    let f = File::create(&filename).await;
+    let stdout = command.stdout.take().expect("Failed to capture stdout");
+    let mut reader = BufReader::new(stdout);
 
-    let file_status = f
-        .expect(format!("Unable to open file {}", &filename).as_str())
-        .write_all(&output.stdout)
-        .await;
+    let mut file = File::create(&filename).await?;
+    let mut buffer = [0; 8192];
 
-    println!("output: {:?}", file_status);
+    loop {
+        let bytes_read = reader.read(&mut buffer)?;
+
+        if bytes_read == 0 {
+            break;
+        }
+
+        file.write_all(&buffer[..bytes_read]).await?;
+    }
+
+    println!("Backup successfully written to {}", filename);
 
     Ok(())
 }
