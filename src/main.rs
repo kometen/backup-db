@@ -62,6 +62,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         file.write_all(&buffer[..bytes_read]).await?;
     }
 
+    // Ensure pg_dump process completes successfully
+    let status = command.wait().await?;
+
+    if !status.success() {
+        eprintln!("pg_dump failed with exit status: {:?}", status);
+        return Err("pg_dump failed".into());
+    }
+
     println!("Backup successfully written to {}", filename);
 
     Ok(())
