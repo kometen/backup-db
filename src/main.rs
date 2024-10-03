@@ -1,8 +1,11 @@
 use azure_security_keyvault::prelude::*;
 use dotenv::dotenv;
-use std::env;
+use std::{env};
 use time::OffsetDateTime;
-use std::process::Command;
+use std::process::{Command, Stdio};
+use dirs::home_dir;
+use tokio::fs::File;
+use tokio::io::{AsyncWriteExt};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -32,9 +35,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         db_name.value
     );
 
-    let folder = "~/data";
+    let home = home_dir().unwrap_or_else(|| "".parse().unwrap()).into_os_string().into_string().unwrap();
+    let folder = "data";
+
     let filename = format!(
-        "{}/{}-{}",
+        "{}/{}/{}-{}.dmp",
+        home,
         folder,
         file_prefix,
         now.date()
@@ -42,9 +48,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let output = Command::new("pg_dump")
         .arg(&connect_string)
-        .output();
+        .stdout(Stdio::piped())
+        .output()?;
 
-    println!("output: {:?}", output);
+    let f = File::create(&filename).await;
+
+    let file_status = f
+        .expect(format!("Unable to open file {}", &filename).as_str())
+        .write_all(&output.stdout)
+        .await;
+
+    println!("output: {:?}", file_status);
 
     Ok(())
 }
