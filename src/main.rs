@@ -2,10 +2,11 @@ use azure_security_keyvault::prelude::*;
 use dirs::home_dir;
 use dotenv::dotenv;
 use std::env;
-use std::process::{Command, Stdio};
+use std::process::Stdio;
 use time::OffsetDateTime;
 use tokio::fs::File;
-use tokio::io::AsyncWriteExt;
+use tokio::io::{AsyncReadExt, AsyncWriteExt, BufReader};
+use tokio::process::Command;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -40,19 +41,36 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let filename = format!("{}/{}/{}-{}.dmp", home, folder, file_prefix, now.date());
 
-    let output = Command::new("pg_dump")
+    let mut command = Command::new("pg_dump")
         .arg(&connect_string)
         .stdout(Stdio::piped())
-        .output()?;
+        .spawn()?;
 
-    let f = File::create(&filename).await;
+    let stdout = command.stdout.take().expect("Failed to capture stdout");
+    let mut reader = BufReader::new(stdout);
 
-    let file_status = f
-        .expect(format!("Unable to open file {}", &filename).as_str())
-        .write_all(&output.stdout)
-        .await;
+    let mut file = File::create(&filename).await?;
+    let mut buffer = [0; 8192];
 
-    println!("output: {:?}", file_status);
+    loop {
+        let bytes_read = reader.read(&mut buffer).await?;
+
+        if bytes_read == 0 {
+            break;
+        }
+
+        file.write_all(&buffer[..bytes_read]).await?;
+    }
+
+    // Ensure pg_dump process completes successfully
+    let status = command.wait().await?;
+
+    if !status.success() {
+        eprintln!("pg_dump failed with exit status: {:?}", status);
+        return Err("pg_dump failed".into());
+    }
+
+    println!("Backup successfully written to {}", filename);
 
     Ok(())
 }
