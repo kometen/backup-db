@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use time::OffsetDateTime;
 
 pub struct FileSystem {
-    pub filename: String,
+    pub filename: PathBuf,
 }
 
 impl FileSystem {
@@ -28,13 +28,12 @@ impl FileSystem {
 
         let path = check_folder(&home, &folder.as_str())?;
 
-        let filename = format!(
-            "{}/{}-{}.dmp{}",
-            path.display(),
+        let filename = Path::new(&path).join(format!(
+            "{}-{}.dmp{}",
             file_prefix,
             now.date(),
             compresion_suffix
-        );
+        ));
 
         Ok(Self { filename })
     }

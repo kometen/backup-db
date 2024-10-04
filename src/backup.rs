@@ -3,6 +3,7 @@ pub mod backup {
     use crate::environment::Environment;
     use crate::filesystem::FileSystem;
     use crate::vault::Vault;
+    use std::path::PathBuf;
     use std::process::Stdio;
     use tokio::fs::File;
     use tokio::io::{AsyncReadExt, AsyncWriteExt, BufReader};
@@ -43,7 +44,8 @@ pub mod backup {
             Err(_) => eprintln!("pg_dump timed out"),
         }
 
-        println!("Backup successfully written to {}", &fs.filename);
+        let file_path = PathBuf::from(&fs.filename);
+        println!("Backup successfully written to {}", &file_path.display());
 
         Ok(())
     }
