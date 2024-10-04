@@ -18,6 +18,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let keyvault_url =
         env::var("KEYVAULT_URL").expect("Missing KEYVAULT_URL environment variable.");
     let file_prefix = env::var("FILE_PREFIX").expect("Missing FILE_PREFIX environment variable.");
+    let compression_parameter = "-Z".to_string();
+    let compression_method = env::var("COMPRESSION_METHOD").unwrap_or_else(|_| "none".to_string());
 
     let credential = azure_identity::create_credential()?;
     let client = SecretClient::new(&keyvault_url, credential)?;
@@ -56,11 +58,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .into_os_string()
         .into_string()
         .unwrap();
+
     let folder = "data";
-    let filename = format!("{}/{}/{}-{}.dmp", home, folder, file_prefix, now.date());
+
+    let compresion_suffix: String = match compression_method.as_str() {
+        "none" => String::new(),
+        _ => format!(".{}", compression_method),
+    };
+
+    let filename = format!(
+        "{}/{}/{}-{}.dmp{}",
+        home,
+        folder,
+        file_prefix,
+        now.date(),
+        compresion_suffix
+    );
 
     let mut command = Command::new("pg_dump")
         .arg(&connect_string)
+        .arg(&compression_parameter)
+        .arg(&compression_method)
         .stdout(Stdio::piped())
         .spawn()?;
 
