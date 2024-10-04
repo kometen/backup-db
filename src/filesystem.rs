@@ -1,4 +1,10 @@
 use crate::environment::Environment;
+use dirs::home_dir;
+use dotenv::dotenv;
+use std::env;
+use std::fs;
+use std::path::{Path, PathBuf};
+use time::OffsetDateTime;
 
 pub struct FileSystem {
     pub filename: String,
@@ -6,11 +12,6 @@ pub struct FileSystem {
 
 impl FileSystem {
     pub fn new(env: &Environment) -> Result<Self, std::io::Error> {
-        use dirs::home_dir;
-        use dotenv::dotenv;
-        use std::env;
-        use time::OffsetDateTime;
-
         dotenv().ok();
 
         let file_prefix =
@@ -29,15 +30,36 @@ impl FileSystem {
             _ => format!(".{}", env.compression_method),
         };
 
+        let path = check_folder(&home.as_str(), &folder.as_str())?;
+
         let filename = format!(
-            "{}/{}/{}-{}.dmp{}",
-            home,
-            folder,
+            "{}/{}-{}.dmp{}",
+            path.to_string_lossy(),
             file_prefix,
             now.date(),
             compresion_suffix
         );
 
         Ok(Self { filename })
+    }
+}
+
+fn check_folder(home: &str, folder: &str) -> Result<PathBuf, std::io::Error> {
+    let path = Path::new(home).join(folder);
+    match fs::metadata(&path) {
+        Ok(metadata) => {
+            if metadata.is_dir() {
+                Ok(path)
+            } else {
+                Err(std::io::Error::new(
+                    std::io::ErrorKind::Other,
+                    format!("Path exists but is not a directory: {}", path.display()),
+                ))
+            }
+        }
+        Err(e) => Err(std::io::Error::new(
+            e.kind(),
+            format!("Error accessing folder {}: {}", path.display(), e),
+        )),
     }
 }
