@@ -1,6 +1,7 @@
 pub mod backup {
 
     use crate::environment::Environment;
+    use crate::filesystem::FileSystem;
     use crate::vault::Vault;
     use std::process::Stdio;
     use tokio::fs::File;
@@ -9,6 +10,7 @@ pub mod backup {
 
     pub async fn perform_backup(
         env: &Environment,
+        fs: &FileSystem,
         vault: &Vault,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let mut command = Command::new("pg_dump")
@@ -20,7 +22,7 @@ pub mod backup {
 
         let stdout = command.stdout.take().expect("Failed to capture stdout");
         let mut reader = BufReader::new(stdout);
-        let mut file = File::create(&env.filename).await?;
+        let mut file = File::create(&fs.filename).await?;
         let mut buffer = vec![0; env.buffer_size];
 
         loop {
@@ -41,7 +43,7 @@ pub mod backup {
             Err(_) => eprintln!("pg_dump timed out"),
         }
 
-        println!("Backup successfully written to {}", &env.filename);
+        println!("Backup successfully written to {}", &fs.filename);
 
         Ok(())
     }
