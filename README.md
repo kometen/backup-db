@@ -1,5 +1,5 @@
 # backup_db
-This Rust-program will get secrets from Azure Key Vault. Log in to Azure using `az login`.
+This Rust-program will get secrets from Azure Key Vault to get credentials to a PostgreSQL database and perform a backup using pg_dump. Log in to Azure with `az login`.
 
 Some settings can be set in a `.env` file like this:
 
