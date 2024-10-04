@@ -20,9 +20,7 @@ pub mod backup {
 
         let stdout = command.stdout.take().expect("Failed to capture stdout");
         let mut reader = BufReader::new(stdout);
-
         let mut file = File::create(&env.filename).await?;
-
         let mut buffer = vec![0; env.buffer_size];
 
         loop {

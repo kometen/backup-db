@@ -13,33 +13,10 @@ impl Vault {
         let client = SecretClient::new(keyvault_url.as_str(), credential).unwrap();
         let domain = env::var("DOMAIN").expect("Missing DOMAIN environment variable.");
 
-        let db_host = client
-            .get("db-host")
-            .await
-            .map_err(|e| format!("Error fetching db-host: {}", e))
-            .unwrap()
-            .value;
-
-        let db_user = client
-            .get("db-user")
-            .await
-            .map_err(|e| format!("Error fetching db-user: {}", e))
-            .unwrap()
-            .value;
-
-        let db_name = client
-            .get("db-name")
-            .await
-            .map_err(|e| format!("Error fetching db-name: {}", e))
-            .unwrap()
-            .value;
-
-        let db_pwd = client
-            .get("db-pwd")
-            .await
-            .map_err(|e| format!("Error fetching db-pwd: {}", e))
-            .unwrap()
-            .value;
+        let db_host = get_secret(&client, String::from("db-host")).await;
+        let db_user = get_secret(&client, String::from("db-user")).await;
+        let db_name = get_secret(&client, String::from("db-name")).await;
+        let db_pwd = get_secret(&client, String::from("db-pwd")).await;
 
         let connect_string = format!(
             "postgres://{}:{}@{}.{}/{}",
@@ -48,4 +25,13 @@ impl Vault {
 
         Ok(Self { connect_string })
     }
+}
+
+async fn get_secret(client: &SecretClient, key: String) -> String {
+    client
+        .get(key)
+        .await
+        .map_err(|e| format!("Error fetching db-host: {}", e))
+        .unwrap()
+        .value
 }
