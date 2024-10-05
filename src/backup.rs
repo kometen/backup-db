@@ -1,5 +1,6 @@
 pub mod backup {
 
+    use crate::compression::Compression;
     use crate::environment::Environment;
     use crate::filesystem::FileSystem;
     use crate::vault::Vault;
@@ -10,14 +11,17 @@ pub mod backup {
     use tokio::process::Command;
 
     pub async fn perform_backup(
+        compression: &Compression,
         env: &Environment,
         fs: &FileSystem,
         vault: &Vault,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let mut command = Command::new("pg_dump")
             .arg(&vault.connect_string)
-            .arg(&env.compression_parameter)
-            .arg(&env.compression_method)
+            .arg(&compression.compression_parameter)
+            .arg(&compression.compression_method)
+            .arg(&compression.compression_parameter)
+            .arg(&compression.compression_level)
             .stdout(Stdio::piped())
             .spawn()?;
 
