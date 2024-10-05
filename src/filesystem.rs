@@ -1,4 +1,4 @@
-use crate::environment::Environment;
+use crate::compression::Compression;
 use dirs::home_dir;
 use dotenv::dotenv;
 use std::env;
@@ -11,7 +11,7 @@ pub struct FileSystem {
 }
 
 impl FileSystem {
-    pub fn new(env: &Environment) -> Result<Self, std::io::Error> {
+    pub fn new(compression: &Compression) -> Result<Self, std::io::Error> {
         dotenv().ok();
 
         let file_prefix =
@@ -21,9 +21,9 @@ impl FileSystem {
 
         let home = home_dir().unwrap_or_else(|| "".parse().unwrap());
 
-        let compresion_suffix: String = match env.compression_method.as_str() {
+        let compresion_suffix: String = match compression.compression_method.as_str() {
             "none" => String::new(),
-            _ => format!(".{}", env.compression_method),
+            _ => format!(".{}", compression.compression_method),
         };
 
         let path = check_folder(&home, &folder.as_str())?;
