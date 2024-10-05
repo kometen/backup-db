@@ -25,6 +25,11 @@ pub mod backup {
             .stdout(Stdio::piped())
             .spawn()?;
 
+        println!(
+            "compression-method: {}, level: {}",
+            &compression.compression_method, &compression.compression_level
+        );
+
         let stdout = command.stdout.take().expect("Failed to capture stdout");
         let mut reader = BufReader::new(stdout);
         let mut file = File::create(&fs.filename).await?;
