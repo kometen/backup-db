@@ -17,26 +17,33 @@ impl FileSystem {
         let file_prefix =
             env::var("FILE_PREFIX").expect("Missing FILE_PREFIX environment variable.");
         let folder = env::var("FOLDER").expect("Missing FOLDER environment variable.");
-        let now = OffsetDateTime::now_utc();
-
         let home = home_dir().unwrap_or_else(|| "".parse().unwrap());
 
-        let compresion_suffix: String = match compression.compression_method.as_str() {
-            "none" => String::new(),
-            _ => format!(".{}", compression.compression_method),
-        };
-
         let path = check_folder(&home, &folder.as_str())?;
-
-        let filename = Path::new(&path).join(format!(
-            "{}-{}.dmp{}",
-            file_prefix,
-            now.date(),
-            compresion_suffix
-        ));
+        let filename = get_filename(&file_prefix, &path, &compression.compression_method)?;
 
         Ok(Self { filename })
     }
+}
+
+fn get_filename(
+    file_prefix: &String,
+    path: &PathBuf,
+    compression_method: &String,
+) -> Result<PathBuf, std::io::Error> {
+    let now = OffsetDateTime::now_utc();
+
+    let compresion_suffix: String = match compression_method.as_str() {
+        "none" => String::new(),
+        _ => format!(".{}", compression_method),
+    };
+
+    Ok(Path::new(&path).join(format!(
+        "{}-{}.dmp{}",
+        file_prefix,
+        now.date(),
+        compresion_suffix
+    )))
 }
 
 fn check_folder(home: &PathBuf, folder: &str) -> Result<PathBuf, std::io::Error> {
