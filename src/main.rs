@@ -1,7 +1,4 @@
-use backup_db::{
-    backup::backup::perform_backup, compression::Compression, environment::Environment,
-    filesystem::FileSystem, vault::Vault,
-};
+use backup_db::{perform_backup, Compression, Environment, FileSystem, Vault};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

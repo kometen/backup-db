@@ -1,9 +1,9 @@
 pub mod backup {
 
-    use crate::compression::Compression;
-    use crate::environment::Environment;
-    use crate::filesystem::FileSystem;
-    use crate::vault::Vault;
+    use crate::Compression;
+    use crate::Environment;
+    use crate::FileSystem;
+    use crate::Vault;
     use std::path::PathBuf;
     use std::process::Stdio;
     use tokio::fs::File;
