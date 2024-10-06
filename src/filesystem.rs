@@ -1,3 +1,5 @@
+mod tests;
+
 use crate::compression::Compression;
 use dirs::home_dir;
 use dotenv::dotenv;
@@ -14,9 +16,12 @@ impl FileSystem {
     pub fn new(compression: &Compression) -> Result<Self, std::io::Error> {
         dotenv().ok();
 
-        let file_prefix =
-            env::var("FILE_PREFIX").expect("Missing FILE_PREFIX environment variable.");
-        let folder = env::var("FOLDER").expect("Missing FOLDER environment variable.");
+        let file_prefix = env::var("FILE_PREFIX")
+            .map_err(|e| format!("Invalid FILE_PREFIX: {}", e))
+            .unwrap();
+        let folder = env::var("FOLDER")
+            .map_err(|e| format!("Invalid FOLDER: {}", e))
+            .unwrap();
         let home = home_dir().unwrap_or_else(|| "".parse().unwrap());
 
         let path = check_folder(&home, &folder.as_str())?;
