@@ -29,9 +29,9 @@ impl Vault {
 
 async fn get_secret(client: &SecretClient, key: String) -> String {
     client
-        .get(key)
+        .get(key.clone())
         .await
-        .map_err(|e| format!("Error fetching db-host: {}", e))
+        .map_err(|e| format!("Error fetching secret using key {}: {}", key, e))
         .unwrap()
         .value
 }
