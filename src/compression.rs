@@ -1,4 +1,7 @@
-use std::env::VarError;
+mod tests;
+
+use range_check::OutOfRangeError;
+use std::{env::VarError, num::ParseIntError};
 
 pub struct Compression {
     pub compression_level: String,
@@ -7,27 +10,32 @@ pub struct Compression {
 }
 
 impl Compression {
-    pub fn new() -> Result<Self, std::io::Error> {
+    pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
         use dotenv::dotenv;
         use std::env;
 
         dotenv().ok();
 
-        let compression_method = get_compression_method(env::var("COMPRESSION_METHOD"));
+        let compression_method_and_level =
+            get_compression_method_and_level(env::var("COMPRESSION_METHOD"));
 
-        let compression_level =
-            get_compression_level(env::var("COMPRESSION_LEVEL"), compression_method.1);
+        let compression_level = get_compression_level(
+            env::var("COMPRESSION_LEVEL").map_err(|e| format!("Invalid COMPRESSION_LEVEL: {}", e)),
+            compression_method_and_level.1,
+        )?;
+
+        let compression_level = check_compression_level_is_in_range(compression_level)?;
 
         Ok(Self {
-            compression_level,
-            compression_method: compression_method.0,
+            compression_level: compression_level.to_string(),
+            compression_method: compression_method_and_level.0,
             compression_parameter: "-Z".to_string(),
         })
     }
 }
 
 // Return-type is compression method and default compression level.
-fn get_compression_method(env: Result<String, VarError>) -> (String, u8) {
+fn get_compression_method_and_level(env: Result<String, VarError>) -> (String, u8) {
     let r = match env.unwrap_or_else(|_| "none".to_string()).as_str() {
         "gzip" => ("gzip".to_string(), 6),
         "lz4" => ("lz4".to_string(), 1),
@@ -39,13 +47,16 @@ fn get_compression_method(env: Result<String, VarError>) -> (String, u8) {
     r
 }
 
-fn get_compression_level(env: Result<String, VarError>, default_compression_level: u8) -> String {
-    use range_check::Check;
-
+fn get_compression_level(
+    env: Result<String, String>,
+    default_compression_level: u8,
+) -> Result<u8, ParseIntError> {
     env.unwrap_or_else(|_| default_compression_level.to_string())
         .parse::<u8>()
-        .unwrap()
-        .check_range(0..10)
-        .unwrap_or(default_compression_level)
-        .to_string()
+}
+
+fn check_compression_level_is_in_range(level: u8) -> Result<u8, OutOfRangeError<u8>> {
+    use range_check::Check;
+
+    level.check_range(0..10)
 }
