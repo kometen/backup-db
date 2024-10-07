@@ -8,6 +8,7 @@ mod tests {
     #[test]
     fn test_path_is_valid() {
         dotenv::from_path("./src/data/.env.test").unwrap();
+        env::set_var("FOLDER", ".");
         let folder = env::var("FOLDER").unwrap();
         let home = home_dir().unwrap_or_else(|| "".parse().unwrap());
         let path = check_folder(&home, &folder.as_str());
