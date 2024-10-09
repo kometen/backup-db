@@ -19,9 +19,10 @@ pub mod backup {
         let mut command = Command::new("pg_dump")
             .arg(&vault.connect_string)
             .arg(&compression.compression_parameter)
-            .arg(&compression.compression_method)
-            .arg(&compression.compression_parameter)
-            .arg(&compression.compression_level)
+            .arg(format!(
+                "{}:{}",
+                &compression.compression_method, &compression.compression_level
+            ))
             .stdout(Stdio::piped())
             .spawn()?;
 
