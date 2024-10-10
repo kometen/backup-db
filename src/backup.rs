@@ -16,8 +16,13 @@ pub mod backup {
         fs: &FileSystem,
         vault: &Vault,
     ) -> Result<(), Box<dyn std::error::Error>> {
+        let connection_string = format!(
+            "postgres://{}:{}@{}.{}/{}",
+            &vault.user, &vault.pwd, &vault.host, &env.domain, &vault.name
+        );
+
         let mut command = Command::new("pg_dump")
-            .arg(&vault.connect_string)
+            .arg(&connection_string)
             .arg(&compression.compression_parameter)
             .arg(format!(
                 "{}:{}",
