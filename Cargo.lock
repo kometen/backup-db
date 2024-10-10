@@ -237,6 +237,7 @@ dependencies = [
 name = "backup_db"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "async-trait",
  "azure_core",
  "azure_identity",
