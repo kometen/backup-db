@@ -19,5 +19,5 @@ reqwest = { version = "0.12", features = [
 dotenv = "0.15.0"
 dirs = "5.0.1"
 range_check = "0.2"
-trust-dns-resolver = "0.23"
+hickory-resolver = "0.24"
 url = "2.5"
