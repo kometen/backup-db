@@ -1,12 +1,11 @@
 #[cfg(test)]
 mod tests {
-    use std::env;
-
     use crate::compression::{
         check_compression_level_is_in_range, get_compression_level,
         get_compression_method_and_level,
     };
     use anyhow::Context;
+    use std::env;
 
     #[test]
     fn test_compression_method_is_none_when_env_value_is_missing() {
