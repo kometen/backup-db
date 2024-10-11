@@ -1,6 +1,7 @@
 mod tests;
 
 use crate::compression::Compression;
+use anyhow::{Context, Result};
 use dirs::home_dir;
 use dotenv::dotenv;
 use std::env;
@@ -13,16 +14,15 @@ pub struct FileSystem {
 }
 
 impl FileSystem {
-    pub fn new(compression: &Compression) -> Result<Self, std::io::Error> {
+    pub fn new(compression: &Compression) -> Result<Self> {
         dotenv().ok();
 
-        let file_prefix = env::var("FILE_PREFIX")
-            .map_err(|e| format!("Invalid FILE_PREFIX: {}", e))
-            .unwrap();
-        let folder = env::var("FOLDER")
-            .map_err(|e| format!("Invalid FOLDER: {}", e))
-            .unwrap();
-        let home = home_dir().unwrap_or_else(|| "".parse().unwrap());
+        let file_prefix =
+            env::var("FILE_PREFIX").context("Invalid FILE_PREFIX environment variable")?;
+
+        let folder = env::var("FOLDER").context("Invalid FOLDER environment variable")?;
+
+        let home = home_dir().context("Failed to determine home directory")?;
 
         let path = check_folder(&home, &folder.as_str())?;
         let filename = get_filename(&file_prefix, &path, &compression.compression_method)?;
@@ -35,7 +35,7 @@ fn get_filename(
     file_prefix: &String,
     path: &PathBuf,
     compression_method: &String,
-) -> Result<PathBuf, std::io::Error> {
+) -> Result<PathBuf> {
     let now = OffsetDateTime::now_utc();
 
     let compresion_suffix: String = match compression_method.as_str() {
@@ -51,22 +51,14 @@ fn get_filename(
     )))
 }
 
-fn check_folder(home: &PathBuf, folder: &str) -> Result<PathBuf, std::io::Error> {
+fn check_folder(home: &PathBuf, folder: &str) -> Result<PathBuf> {
     let path = Path::new(home).join(folder);
-    match fs::metadata(&path) {
-        Ok(metadata) => {
-            if metadata.is_dir() {
-                Ok(path)
-            } else {
-                Err(std::io::Error::new(
-                    std::io::ErrorKind::Other,
-                    format!("Path exists but is not a directory: {}", path.display()),
-                ))
-            }
-        }
-        Err(e) => Err(std::io::Error::new(
-            e.kind(),
-            format!("Error accessing folder {}: {}", path.display(), e),
-        )),
+    let metadata = fs::metadata(&path)
+        .with_context(|| format!("Error accessing folder: {}", path.display()))?;
+
+    if metadata.is_dir() {
+        Ok(path)
+    } else {
+        anyhow::bail!("Path exists but is not a directory: {}", path.display());
     }
 }

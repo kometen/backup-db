@@ -15,7 +15,7 @@ mod tests {
             .expect("BUFFER_SIZE should be set in test");
         let buffer_size_2 = get_buffer_size(env_2);
 
-        assert_eq!(8192, buffer_size_2.unwrap());
+        assert!(buffer_size_2.is_err());
     }
 
     #[test]
@@ -39,6 +39,6 @@ mod tests {
         let env_4 = env::var("BUFFER_SIZE").unwrap_or_else(|_| "".to_string());
         let buffer_size_4 = get_buffer_size(env_4);
 
-        assert_eq!(8192, buffer_size_4.unwrap());
+        assert!(buffer_size_4.is_err());
     }
 }
