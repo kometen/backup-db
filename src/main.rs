@@ -3,7 +3,7 @@ use backup_db::{check_dns, perform_backup, Compression, Environment, FileSystem,
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let compression = Compression::new().unwrap();
+    let compression = Compression::new()?;
     let env = Environment::new().unwrap();
     let fs = FileSystem::new(&compression).unwrap();
     let vault = Vault::new().await?;

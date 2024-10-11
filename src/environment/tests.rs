@@ -7,35 +7,35 @@ mod tests {
     #[test]
     fn test_error_is_returned_when_value_is_missing() {
         dotenv::from_path("./src/data/.env.test").unwrap();
-        let env = env::var("BUFFER_SIZE");
-        let buffer_size = get_buffer_size(env);
-        assert!(buffer_size.is_err());
+        let env_1 = env::var("BUFFER_SIZE");
+        let buffer_size_1 = get_buffer_size(env_1);
+        assert!(buffer_size_1.is_err());
     }
 
     #[test]
     fn test_error_is_returned_when_value_is_not_a_number() {
         dotenv::from_path("./src/data/.env.test").unwrap();
         env::set_var("BUFFER_SIZE", "value");
-        let env = env::var("BUFFER_SIZE");
-        let buffer_size = get_buffer_size(env);
-        assert!(buffer_size.is_err());
+        let env_2 = env::var("BUFFER_SIZE");
+        let buffer_size_2 = get_buffer_size(env_2);
+        assert!(buffer_size_2.is_err());
     }
 
     #[test]
     fn test_value_is_a_number() {
         dotenv::from_path("./src/data/.env.test").unwrap();
         env::set_var("BUFFER_SIZE", "1967");
-        let env = env::var("BUFFER_SIZE");
-        let buffer_size = get_buffer_size(env);
-        assert_eq!(1967, buffer_size.unwrap());
+        let env_3 = env::var("BUFFER_SIZE");
+        let buffer_size_3 = get_buffer_size(env_3);
+        assert_eq!(1967, buffer_size_3.unwrap());
     }
 
     #[test]
     fn test_default_value_when_variable_not_set() {
         dotenv::from_path("./src/data/.env.test").unwrap();
         env::remove_var("BUFFER_SIZE");
-        let env = env::var("BUFFER_SIZE");
-        let buffer_size = get_buffer_size(env);
-        assert_eq!(8192, buffer_size.unwrap());
+        let env_4 = env::var("BUFFER_SIZE");
+        let buffer_size_4 = get_buffer_size(env_4);
+        assert_eq!(8192, buffer_size_4.unwrap());
     }
 }
