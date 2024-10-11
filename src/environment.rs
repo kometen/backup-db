@@ -1,5 +1,6 @@
 mod tests;
 use anyhow::{Context, Result};
+use dotenv::dotenv;
 use std::env;
 
 pub struct Environment {
@@ -9,10 +10,13 @@ pub struct Environment {
 
 impl Environment {
     pub fn new() -> Result<Self> {
+        dotenv().ok();
+
         let domain = env::var("DOMAIN").context("Failed to get DOMAIN")?;
-        let buffer_size =
-            get_buffer_size(env::var("BUFFER_SIZE").context("Failed to get BUFFER_SIZE")?)
-                .context("Failed to parse buffer size")?;
+
+        let buffer_size = env::var("BUFFER_SIZE")
+            .map(|s| get_buffer_size(s))
+            .unwrap_or(Ok(8192))?;
 
         Ok(Self {
             domain,
@@ -24,8 +28,7 @@ impl Environment {
 fn get_buffer_size(env: String) -> Result<usize> {
     let buffer_size = env
         .parse::<usize>()
-        .with_context(|| format!("Invalid buffer size: {}", env))
-        .unwrap_or(8192);
+        .context(format!("Invalid BUFFER_SIZE value: {}", env))?;
 
     Ok(buffer_size)
 }

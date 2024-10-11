@@ -5,7 +5,7 @@ use backup_db::{check_dns, perform_backup, Compression, Environment, FileSystem,
 async fn main() -> Result<()> {
     let compression = Compression::new()?;
     let env = Environment::new()?;
-    let fs = FileSystem::new(&compression).unwrap();
+    let fs = FileSystem::new(&compression)?;
     let vault = Vault::new().await?;
     if let Err(e) = check_dns(&vault, &env).await {
         //eprintln!("DNS resolution failed: {}", e);
