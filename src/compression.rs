@@ -52,6 +52,7 @@ fn get_compression_level(env: String, default_compression_level: u8) -> Result<u
         .parse::<u8>()
         .with_context(|| format!("Invalid compression level: {}", env))
         .unwrap_or(default_compression_level);
+
     Ok(compression_level)
 }
 
