@@ -17,16 +17,13 @@ jobs:
 
     steps:
       - name: Load secret
-        uses: 1password/load-secrets-action/configure@v2
-        with:
-          service_account_token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-
-      - name: Load Rust test credentials
+        id: op-load-secret
         uses: 1password/load-secrets-action@v2
         with:
           export-env: false
         env:
-          AZURE_KEY_VAULT_TEST: op://Production/AzureKeyVaultFaktura/credentials/url
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          VAULT_URL: op://Production/AzureKeyVaultTest/credentials/url
 
       - uses: actions/checkout@v4
       - name: Run tests
