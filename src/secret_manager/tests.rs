@@ -9,10 +9,18 @@ mod tests {
             "AZURE_KEY_VAULT_TEST",
             "op://Production/AzureKeyVaultTest/credentials/url",
         );
-        let result = SecretManager::with_key("AZURE_KEY_VAULT_TEST");
-        assert!(result.is_ok());
-        let secret_manager = result.unwrap();
-        assert_eq!(secret_manager.url, "https://foo.bar.baz.net/");
+
+        if env::var("GITHUB_ACTIONS").is_ok() {
+            let result = env::var("AZURE_KEY_VAULT_TEST");
+            assert!(result.is_ok());
+            let secret_manager = result.unwrap();
+            assert_eq!(secret_manager, "https://foo.bar.baz.net/");
+        } else {
+            let result = SecretManager::with_key("AZURE_KEY_VAULT_TEST");
+            assert!(result.is_ok());
+            let secret_manager = result.unwrap();
+            assert_eq!(secret_manager.url, "https://foo.bar.baz.net/");
+        }
     }
 
     #[test]

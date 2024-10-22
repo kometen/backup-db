@@ -19,9 +19,13 @@ jobs:
       - name: Load secret
         uses: 1password/load-secrets-action@v2
         with:
-          export-env: false
+          service_account_token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+
+      - name: Load Rust test credentials
+        uses: 1password/load-secrets-action@v2
+        with:
+          export-env: true
         env:
-          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           AZURE_KEY_VAULT_TEST: op://Production/AzureKeyVaultFaktura/credentials/url
 
       - uses: actions/checkout@v4
