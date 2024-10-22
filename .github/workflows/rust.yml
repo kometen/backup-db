@@ -24,7 +24,7 @@ jobs:
       - name: Load Rust test credentials
         uses: 1password/load-secrets-action@v2
         with:
-          export-env: true
+          export-env: false
         env:
           AZURE_KEY_VAULT_TEST: op://Production/AzureKeyVaultFaktura/credentials/url
 
