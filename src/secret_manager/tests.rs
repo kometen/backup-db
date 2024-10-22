@@ -7,7 +7,7 @@ mod tests {
     fn test_new_with_valid_env_var() {
         env::set_var(
             "AZURE_KEY_VAULT_TEST",
-            "op://Private/AzureKeyVaultTest/credentials/url",
+            "op://Production/AzureKeyVaultTest/credentials/url",
         );
         let result = SecretManager::with_key("AZURE_KEY_VAULT_TEST");
         assert!(result.is_ok());
