@@ -5,17 +5,16 @@ mod tests {
 
     #[test]
     fn test_new_with_valid_env_var() {
-        env::set_var(
-            "AZURE_KEY_VAULT_TEST",
-            "op://Production/AzureKeyVaultTest/credentials/url",
-        );
-
         if env::var("GITHUB_ACTIONS").is_ok() {
             let result = env::var("AZURE_KEY_VAULT_TEST");
             assert!(result.is_ok());
             let secret_manager = result.unwrap();
             assert_eq!(secret_manager, "https://foo.bar.baz.net/");
         } else {
+            env::set_var(
+                "AZURE_KEY_VAULT_TEST",
+                "op://Production/AzureKeyVaultTest/credentials/url",
+            );
             let result = SecretManager::with_key("AZURE_KEY_VAULT_TEST");
             assert!(result.is_ok());
             let secret_manager = result.unwrap();
