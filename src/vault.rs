@@ -1,5 +1,4 @@
 use azure_security_keyvault::SecretClient;
-use std::env;
 
 pub struct Vault {
     pub host: String,
@@ -9,11 +8,9 @@ pub struct Vault {
 }
 
 impl Vault {
-    pub async fn new() -> Result<Self, std::io::Error> {
-        let keyvault_url =
-            env::var("KEYVAULT_URL").expect("Missing KEYVAULT_URL environment variable.");
+    pub async fn new(url: String) -> Result<Self, std::io::Error> {
         let credential = azure_identity::create_credential().unwrap();
-        let client = SecretClient::new(keyvault_url.as_str(), credential).unwrap();
+        let client = SecretClient::new(url.as_str(), credential).unwrap();
 
         let host = get_secret(&client, String::from("db-host")).await;
         let user = get_secret(&client, String::from("db-user")).await;
