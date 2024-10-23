@@ -34,7 +34,14 @@ impl SecretManager {
     /// # Example
     ///
     /// ```
-    /// let secret_manager = SecretManager::with_key("AZURE_KEY_VAULT_TEST").unswrap();
+    /// use backup_db::SecretManager;
+    /// use anyhow::Result;
+    ///
+    /// fn example() -> Result<()> {
+    ///     let secret_manager = SecretManager::new()?;
+    ///     let secret_manager = SecretManager::with_key("AZURE_KEY_VAULT_TEST")?;
+    ///     Ok(())
+    /// }
     /// ```
     pub fn with_key(key: &str) -> Result<Self> {
         let azure_key_vault_url = env::var(&key).context(format!("Failed to get {}", key))?;
