@@ -14,7 +14,6 @@ COMPRESSION_METHOD=lz4
 DOMAIN=svc.cluster.local
 FILE_PREFIX=production
 FOLDER=backup
-KEYVAULT_URL=https://foo-bar-baz.vault.azure.net/
 ```
 
 Clone the repository and build with `cargo build [--release]`. Or build a container-image
