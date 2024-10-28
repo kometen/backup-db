@@ -11,6 +11,24 @@ pub struct Compression {
 }
 
 impl Compression {
+    /// Creates a new Compression instance with a specific value.
+    ///
+    /// # Returns
+    ///
+    /// A Result containing the Compression if successful, or an error if the secret
+    /// could not be retrieved.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use backup_db::Compression;
+    /// use anyhow::Result;
+    ///
+    /// fn example() -> Result<()> {
+    ///     let compression = Compression::new()?;
+    ///     Ok(())
+    /// }
+    /// ```
     pub fn new() -> Result<Self> {
         use dotenv::dotenv;
 

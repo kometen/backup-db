@@ -5,6 +5,8 @@ mod tests {
     use dotenv;
     use std::env;
 
+    /// Tests Environment returns a number or error.
+
     #[test]
     fn test_error_is_returned_when_value_is_not_a_number() {
         dotenv::from_path("./src/data/.env.test").unwrap();

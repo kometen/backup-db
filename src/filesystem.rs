@@ -14,6 +14,29 @@ pub struct FileSystem {
 }
 
 impl FileSystem {
+    /// Creates a new FileSystem instance with a specific value.
+    ///
+    /// # Arguments
+    ///
+    /// * `compression` - Name of the variable with information about compression value and type
+    ///
+    /// # Returns
+    ///
+    /// A Result containing the FileSystem if successful, or an error if the secret
+    /// could not be retrieved.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use backup_db::Compression;
+    /// use backup_db::FileSystem;
+    /// use anyhow::Result;
+    ///
+    /// fn example() -> Result<()> {
+    ///     let filesystem = FileSystem::new(&Compression::new()?)?;
+    ///     Ok(())
+    /// }
+    /// ```
     pub fn new(compression: &Compression) -> Result<Self> {
         dotenv().ok();
 

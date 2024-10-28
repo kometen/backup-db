@@ -5,6 +5,8 @@ mod tests {
 
     use crate::filesystem::check_folder;
 
+    /// Tests Filesystem with a valid and invalid path.
+
     #[test]
     fn test_path_is_valid() {
         dotenv::from_path("./src/data/.env.test").unwrap();

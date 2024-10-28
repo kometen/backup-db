@@ -21,8 +21,8 @@ async fn main() -> Result<()> {
     let secret_manager = SecretManager::new(cli.namespace.as_str())?;
     let vault = Vault::new(secret_manager.url).await?;
     if let Err(e) = check_dns(&vault).await {
-        //eprintln!("DNS resolution failed: {}", e);
-        //eprintln!("Root cause: {}", e.root_cause());
+        eprintln!("DNS resolution failed: {}", e);
+        eprintln!("Root cause: {}", e.root_cause());
         return Err(e);
     }
 

@@ -10,6 +10,26 @@ pub mod backup {
     use tokio::io::{AsyncReadExt, AsyncWriteExt, BufReader};
     use tokio::process::Command;
 
+    /// Performs the actual backup.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use backup_db::perform_backup;
+    /// use backup_db::Compression;
+    /// use backup_db::Environment;
+    /// use backup_db::FileSystem;
+    /// use backup_db::Vault;
+    ///
+    /// async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    ///     let compression = Compression::new()?;
+    ///     let environment = Environment::new()?;
+    ///     let filesystem = FileSystem::new(&compression)?;
+    ///     let vault = Vault::new("URL".to_string()).await?;
+    ///     let _ = perform_backup(&compression, &environment, &filesystem, &vault);
+    ///     Ok(())
+    /// }
+    /// ```
     pub async fn perform_backup(
         compression: &Compression,
         env: &Environment,

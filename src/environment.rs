@@ -8,6 +8,24 @@ pub struct Environment {
 }
 
 impl Environment {
+    /// Creates a new Environment instance with a specific value.
+    ///
+    /// # Returns
+    ///
+    /// A Result containing the Environment if successful, or an error if the secret
+    /// could not be retrieved.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use backup_db::Environment;
+    /// use anyhow::Result;
+    ///
+    /// fn example() -> Result<()> {
+    ///     let environment = Environment::new()?;
+    ///     Ok(())
+    /// }
+    /// ```
     pub fn new() -> Result<Self> {
         dotenv().ok();
 

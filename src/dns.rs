@@ -6,6 +6,15 @@ pub mod dns {
     use hickory_resolver::system_conf::read_system_conf;
     use hickory_resolver::AsyncResolver;
 
+    /// # Arguments
+    ///
+    /// * `vault` - Name of the variable with values from Azure Key Vault
+    ///
+    /// # Returns
+    ///
+    /// A Result containing the resolved hostname + domainname if successful,
+    /// or an error if the hostname + domainname could not be resolved.
+    ///
     pub async fn check_dns(vault: &Vault) -> Result<()> {
         let (config, opts) = read_system_conf().map_err(|e| ResolveError::from(e))?;
         let resolver = AsyncResolver::tokio(config, opts);
