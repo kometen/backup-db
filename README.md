@@ -11,16 +11,25 @@ Some settings can be set in a `.env` file like this:
 ```
 BUFFER_SIZE=16384
 COMPRESSION_METHOD=lz4
-DOMAIN=svc.cluster.local
 FILE_PREFIX=production
 FOLDER=backup
+```
+
+Add the following secrets to Azure Key Vault:
+
+```
+db-host
+db-name
+db-pwd
+db-user
+db-domain
 ```
 
 Clone the repository and build with `cargo build [--release]`. Or build a container-image
 with `docker build -t backup_db:dev .`. This does not currently inherit the Azure Login
 environment so will not work without modifications.
 
-Test with `cargo test`.
+Test with `cargo test`. Run with `./target/release/backup-dn n [namespace]`.
 
 Requires 1password command line utilities installed locally, an Azure-subscription, a PostgreSQL database.
 

@@ -4,21 +4,22 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+anyhow = "1.0"
 async-trait = "0.1"
-futures = "0.3"
-time = { version = "0.3", features = ["macros"] }
-serde_json = "1.0"
-serde = { version = "1.0", features = ["derive"] }
 azure_core = { version = "0.20", features = ["enable_reqwest_rustls"] }
 azure_identity = { version = "0.20", default-features = false }
 azure_security_keyvault = "0.20.0"
-tokio = { version = "1", features = ["full"] }
+clap = { version = "4.5", features = ["derive"] }
+dirs = "5.0.1"
+dotenv = "0.15.0"
+futures = "0.3"
+hickory-resolver = "0.24"
 reqwest = { version = "0.12", features = [
     "stream",
 ], default-features = false, optional = true }
-dotenv = "0.15.0"
-dirs = "5.0.1"
 range_check = "0.2"
-hickory-resolver = "0.24"
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+time = { version = "0.3", features = ["macros"] }
+tokio = { version = "1", features = ["full"] }
 url = "2.5"
-anyhow = "1.0"

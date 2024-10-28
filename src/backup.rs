@@ -18,7 +18,7 @@ pub mod backup {
     ) -> Result<(), Box<dyn std::error::Error>> {
         let connection_string = format!(
             "postgres://{}:{}@{}.{}/{}",
-            &vault.user, &vault.pwd, &vault.host, &env.domain, &vault.name
+            &vault.user, &vault.pwd, &vault.host, &vault.domain, &vault.name
         );
 
         let mut command = Command::new("pg_dump")
