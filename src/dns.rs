@@ -1,15 +1,15 @@
 pub mod dns {
 
-    use crate::{Environment, Vault};
+    use crate::Vault;
     use anyhow::{Context, Result};
     use hickory_resolver::error::ResolveError;
     use hickory_resolver::system_conf::read_system_conf;
     use hickory_resolver::AsyncResolver;
 
-    pub async fn check_dns(vault: &Vault, env: &Environment) -> Result<()> {
+    pub async fn check_dns(vault: &Vault) -> Result<()> {
         let (config, opts) = read_system_conf().map_err(|e| ResolveError::from(e))?;
         let resolver = AsyncResolver::tokio(config, opts);
-        let hostname = format!("{}.{}.", &vault.host, &env.domain);
+        let hostname = format!("{}.{}.", &vault.host, &vault.domain);
         let response = resolver
             .lookup_ip(&hostname)
             .await
