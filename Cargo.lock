@@ -291,6 +291,7 @@ dependencies = [
  "azure_core",
  "azure_identity",
  "azure_security_keyvault",
+ "chrono",
  "clap",
  "dirs",
  "dotenv",
@@ -301,7 +302,6 @@ dependencies = [
  "serde",
  "serde_json",
  "tempfile",
- "time",
  "tokio",
  "url",
 ]

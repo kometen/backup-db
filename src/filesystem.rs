@@ -2,12 +2,12 @@ mod tests;
 
 use crate::compression::Compression;
 use anyhow::{Context, Result};
+use chrono::Local;
 use dirs::home_dir;
 use dotenv::dotenv;
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
-use time::OffsetDateTime;
 
 pub struct FileSystem {
     pub filename: PathBuf,
@@ -59,7 +59,7 @@ fn get_filename(
     path: &PathBuf,
     compression_method: &String,
 ) -> Result<PathBuf> {
-    let now = OffsetDateTime::now_utc();
+    let now = Local::now();
 
     let compresion_suffix: String = match compression_method.as_str() {
         "none" => String::new(),
@@ -69,7 +69,7 @@ fn get_filename(
     Ok(Path::new(&path).join(format!(
         "{}-{}.dmp{}",
         file_prefix,
-        now.date(),
+        now.date_naive(),
         compresion_suffix
     )))
 }
