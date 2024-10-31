@@ -4,8 +4,11 @@ pub mod backup {
     use crate::Environment;
     use crate::FileSystem;
     use crate::Vault;
+    use anyhow::Result;
+    use std::path::Path;
     use std::path::PathBuf;
     use std::process::Stdio;
+    use tempfile::NamedTempFile;
     use tokio::fs::File;
     use tokio::io::{AsyncReadExt, AsyncWriteExt, BufReader};
     use tokio::process::Command;
@@ -35,25 +38,33 @@ pub mod backup {
         env: &Environment,
         fs: &FileSystem,
         vault: &Vault,
-    ) -> Result<(), Box<dyn std::error::Error>> {
+    ) -> Result<()> {
+        // Create temporary file in the same directory as the target file
+        let filename = &fs.filename;
+        let dir = Path::new(&filename).parent().unwrap_or(Path::new("."));
+        let temp_file = NamedTempFile::new_in(dir)?;
+        let temp_path = temp_file.path().to_path_buf();
+
         let connection_string = format!(
-            "postgres://{}:{}@{}.{}/{}",
-            &vault.user, &vault.pwd, &vault.host, &vault.domain, &vault.name
+            "postgres://{}@{}.{}/{}",
+            &vault.user, &vault.host, &vault.domain, &vault.name
         );
 
         let mut command = Command::new("pg_dump")
             .arg(&connection_string)
+            .env("PGPASSWORD", &vault.pwd)
             .arg(&compression.compression_parameter)
             .arg(format!(
                 "{}:{}",
                 &compression.compression_method, &compression.compression_level
             ))
             .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
             .spawn()?;
 
         let stdout = command.stdout.take().expect("Failed to capture stdout");
         let mut reader = BufReader::new(stdout);
-        let mut file = File::create(&fs.filename).await?;
+        let mut file = File::create(&temp_path).await?;
         let mut buffer = vec![0; env.buffer_size];
 
         loop {
@@ -66,21 +77,42 @@ pub mod backup {
             file.write_all(&buffer[..bytes_read]).await?;
         }
 
-        let timeout_duration = std::time::Duration::from_secs(60);
-        let result = tokio::time::timeout(timeout_duration, command.wait()).await;
-        match result {
-            Ok(Ok(_status)) => { /* everyting is ok */ }
-            Ok(Err(e)) => eprintln!("pg_dump failed with exit status: {:?}", e),
-            Err(_) => eprintln!("pg_dump timed out"),
-        }
+        let status = command.wait().await?;
 
-        let file_path = PathBuf::from(&fs.filename);
-        println!(
-            "Backup successfully written to {} using {} compression at level {}.",
-            &file_path.display(),
-            &compression.compression_method,
-            &compression.compression_level
-        );
+        if !status.success() {
+            // Read stderr to get error message
+            let mut stderr = String::new();
+            if let Some(mut stderr_handle) = command.stderr {
+                stderr_handle.read_to_string(&mut stderr).await?;
+            }
+
+            return Err(anyhow::anyhow!(
+                "pg_dump failed with exit code: {:?}, error: {}",
+                status.code(),
+                stderr
+            ));
+        } else {
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                std::fs::set_permissions(&temp_path, std::fs::Permissions::from_mode(0o644))?;
+            }
+
+            // Ensure the target directory exists
+            if let Some(parent) = Path::new(&filename).parent() {
+                std::fs::create_dir_all(parent)?;
+            }
+
+            std::fs::rename(&temp_path, &filename)?;
+
+            let file_path = PathBuf::from(&filename);
+            println!(
+                "Backup successfully written to {} using {} compression at level {}.",
+                &file_path.display(),
+                &compression.compression_method,
+                &compression.compression_level
+            );
+        }
 
         Ok(())
     }
