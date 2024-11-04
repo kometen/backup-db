@@ -23,6 +23,7 @@ reqwest = { version = "0.12", features = [
 range_check = "0.2"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
+secret_manager_1password = "0.1.0"
 tempfile = "3.13"
 tokio = { version = "1", features = ["full"] }
 url = "2.5"
