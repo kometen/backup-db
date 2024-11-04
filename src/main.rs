@@ -1,7 +1,8 @@
 use anyhow::Result;
 use azure_vault_secrets::Vault;
-use backup_db::{check_dns, perform_backup, Compression, DatabaseConfig, Environment, FileSystem};
+use backup_db::{perform_backup, Compression, DatabaseConfig, Environment, FileSystem};
 use clap::Parser;
+use hostname_resolver::dns::check_dns;
 use secret_manager_1password::SecretManager;
 
 #[derive(Parser)]
