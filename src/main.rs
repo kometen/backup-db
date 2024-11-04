@@ -1,8 +1,8 @@
 use anyhow::Result;
-use backup_db::{
-    check_dns, perform_backup, Compression, Environment, FileSystem, SecretManager, Vault,
-};
+use azure_vault_secrets::Vault;
+use backup_db::{check_dns, perform_backup, Compression, Environment, FileSystem, SecretManager};
 use clap::Parser;
+use db_config::DatabaseConfig;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -19,7 +19,8 @@ async fn main() -> Result<()> {
     let env = Environment::new()?;
     let fs = FileSystem::new(&compression)?;
     let secret_manager = SecretManager::new(cli.namespace.as_str())?;
-    let vault = Vault::new(secret_manager.url).await?;
+    let db_keys = DatabaseConfig::db_keys();
+    let vault = Vault::new(secret_manager.url.as_str(), db_keys).await?;
     if let Err(e) = check_dns(&vault).await {
         eprintln!("DNS resolution failed: {}", e);
         eprintln!("Root cause: {}", e.root_cause());

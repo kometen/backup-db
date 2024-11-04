@@ -3,8 +3,9 @@ pub mod backup {
     use crate::Compression;
     use crate::Environment;
     use crate::FileSystem;
-    use crate::Vault;
     use anyhow::Result;
+    use azure_vault_secrets::Vault;
+    use db_config::DatabaseConfig;
     use std::path::Path;
     use std::path::PathBuf;
     use std::process::Stdio;
@@ -19,16 +20,18 @@ pub mod backup {
     ///
     /// ```
     /// use backup_db::perform_backup;
+    /// use db_config::DatabaseConfig;
     /// use backup_db::Compression;
     /// use backup_db::Environment;
     /// use backup_db::FileSystem;
-    /// use backup_db::Vault;
+    /// use azure_vault_secrets::Vault;
     ///
     /// async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    ///     let db_keys = DatabaseConfig::db_keys();
     ///     let compression = Compression::new()?;
     ///     let environment = Environment::new()?;
     ///     let filesystem = FileSystem::new(&compression)?;
-    ///     let vault = Vault::new("URL".to_string()).await?;
+    ///     let vault = Vault::new("URL", db_keys).await?;
     ///     let _ = perform_backup(&compression, &environment, &filesystem, &vault);
     ///     Ok(())
     /// }
@@ -44,15 +47,11 @@ pub mod backup {
         let dir = Path::new(&filename).parent().unwrap_or(Path::new("."));
         let temp_file = NamedTempFile::new_in(dir)?;
         let temp_path = temp_file.path().to_path_buf();
-
-        let connection_string = format!(
-            "postgres://{}@{}.{}/{}",
-            &vault.user, &vault.host, &vault.domain, &vault.name
-        );
+        let config = DatabaseConfig::from_vault(vault)?;
 
         let mut command = Command::new("pg_dump")
-            .arg(&connection_string)
-            .env("PGPASSWORD", &vault.pwd)
+            .arg(&config.connection_string())
+            .env("PGPASSWORD", &config.password())
             .arg(&compression.compression_parameter)
             .arg(format!(
                 "{}:{}",
