@@ -4,8 +4,8 @@ pub mod backup {
     use crate::Environment;
     use crate::FileSystem;
     use anyhow::Result;
-    use azure_vault_secrets::Vault;
-    use db_config::DatabaseConfig;
+    use azure_vault_secrets::{Vault, VaultStorage};
+    use db_config::db_config_from_vault;
     use std::path::Path;
     use std::path::PathBuf;
     use std::process::Stdio;
@@ -20,13 +20,15 @@ pub mod backup {
     ///
     /// ```
     /// use backup_db::perform_backup;
-    /// use db_config::DatabaseConfig;
+    /// use db_config::db_config_from_vault;
     /// use backup_db::Compression;
     /// use backup_db::Environment;
     /// use backup_db::FileSystem;
-    /// use azure_vault_secrets::Vault;
+    /// use azure_vault_secrets::{Vault, VaultStorage};
     ///
     /// async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    ///     db_config_from_vault!([host, user, name, pwd, domain]);
+    ///
     ///     let db_keys = DatabaseConfig::db_keys();
     ///     let compression = Compression::new()?;
     ///     let environment = Environment::new()?;
@@ -42,6 +44,8 @@ pub mod backup {
         fs: &FileSystem,
         vault: &Vault,
     ) -> Result<()> {
+        db_config_from_vault!([host, user, name, pwd, domain]);
+
         // Create temporary file in the same directory as the target file
         let filename = &fs.filename;
         let dir = Path::new(&filename).parent().unwrap_or(Path::new("."));
