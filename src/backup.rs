@@ -1,11 +1,11 @@
 pub mod backup {
 
     use crate::Compression;
+    use crate::DatabaseConfig;
     use crate::Environment;
     use crate::FileSystem;
     use anyhow::Result;
-    use azure_vault_secrets::{Vault, VaultStorage};
-    use db_config::db_config_from_vault;
+    use azure_vault_secrets::Vault;
     use std::path::Path;
     use std::path::PathBuf;
     use std::process::Stdio;
@@ -44,8 +44,6 @@ pub mod backup {
         fs: &FileSystem,
         vault: &Vault,
     ) -> Result<()> {
-        db_config_from_vault!([host, user, name, pwd, domain]);
-
         // Create temporary file in the same directory as the target file
         let filename = &fs.filename;
         let dir = Path::new(&filename).parent().unwrap_or(Path::new("."));
