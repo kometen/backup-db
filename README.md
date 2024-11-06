@@ -1,10 +1,10 @@
 # backup_db
-This Rust-program will perform a backup using pg_dump.
 
-It gets an URL to an Azure Key Vault from 1password and then retrieve secrets
-from Azure Key Vault to a PostgreSQL database and performs the backup.
+A wrapper around pg_dump so information about host to connect to, database, password is retrieved from Azure Key Vault
+and URL to Azure Key Vault from 1password thus avoiding storing passwords in cleartext locally.
 
-Log in to Azure with `az login`.
+Requires 1password  and Azure command line utilities installed locally, an Azure-subscription, a PostgreSQL-client.
+Log in with `az login`.
 
 Some settings can be set in a `.env` file like this:
 
@@ -50,8 +50,6 @@ docker run --user backup_db_user backup_db:dev
 ```
 
 The container will not inherit the environment from the shell so running from the container will not work.
-
-Requires 1password command line utilities installed locally, an Azure-subscription, a PostgreSQL-client.
 
 Based on an example from https://github.com/Azure/azure-sdk-for-rust/blob/main/sdk/security_keyvault/examples/get_secret.rs
 and guidance from both ChatGPT and Claude. Used the editor zed at `https://github.com/zed-industries/zed`.
