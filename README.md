@@ -45,7 +45,7 @@ cargo build [--release]
 Build and run the container-image.
 
 ```
-docker build -t rusty_psql:dev .
+docker build -t backup_db:dev .
 docker run --user backup_db_user backup_db:dev
 ```
 
