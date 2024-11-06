@@ -25,12 +25,33 @@ db-user
 db-domain
 ```
 
-Clone the repository and build with `cargo build [--release]`. Or build a container-image
-with `docker build -t backup_db:dev .`. This does not currently inherit the Azure Login
-environment so will not work without modifications.
+Add an entry in 1password that can be accessed by the program. The path is formatted in Rust.
 
-Test with `cargo test`. Run with `./target/release/backup-dn n [namespace]`.
+```
+let op_path = format!("op://Production/AzureKeyVault{}/credentials/url", key);
+```
 
-Requires 1password command line utilities installed locally, an Azure-subscription, a PostgreSQL database.
+An example of a path can be `op://Production/AzureKeyVaultInvoice/credentials/url`. The path can be changed to suit your own
+requirement with the format `op://[vault-name]/[item]/[text-field]/[value]` in 1password.
 
-Based on an example from https://github.com/Azure/azure-sdk-for-rust/blob/main/sdk/security_keyvault/examples/get_secret.rs and guidance from both ChatGPT and Claude.
+Clone the repository, test, build and run with
+
+```
+cargo test
+cargo build [--release]
+./target/release/backup_db -n invoice
+```
+
+Build and run the container-image.
+
+```
+docker build -t rusty_psql:dev .
+docker run --user backup_db_user backup_db:dev
+```
+
+The container will not inherit the environment from the shell so running from the container will not work.
+
+Requires 1password command line utilities installed locally, an Azure-subscription, a PostgreSQL-client.
+
+Based on an example from https://github.com/Azure/azure-sdk-for-rust/blob/main/sdk/security_keyvault/examples/get_secret.rs
+and guidance from both ChatGPT and Claude. Used the editor zed at `https://github.com/zed-industries/zed`.
